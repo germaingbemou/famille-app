@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import Dashboard from "../pages/Dashboard";
 import Members from "../pages/Members";
 import Cotisations from "../pages/Cotisations";
@@ -7,7 +8,7 @@ import Expenses from "../pages/Expenses";
 import Reports from "../pages/Reports";
 import Suspensions from "../pages/Suspensions";
 
-function MainLayout({ profile })  {
+function MainLayout({ role }) {
   const [pageActive, setPageActive] = useState("dashboard");
 
   const menu = [
@@ -16,25 +17,30 @@ function MainLayout({ profile })  {
     { id: "cotisations", label: "Cotisations" },
     { id: "sociales", label: "Sociales" },
     { id: "expenses", label: "Dépenses" },
-    { id: "reports", label: "Rapports" },
     { id: "suspensions", label: "Suspensions" },
+    { id: "reports", label: "Rapports" },
   ];
 
   const afficherPage = () => {
-    if (pageActive === "dashboard") return <Dashboard />;
-    if (pageActive === "members") return <Members />;
-    if (pageActive === "cotisations") return <Cotisations />;
-    if (pageActive === "sociales") return <Sociales />;
-    if (pageActive === "expenses") return <Expenses />;
-    if (pageActive === "reports") return <Reports />;
-    if (pageActive === "suspensions") return <Suspensions />;
-    return <Dashboard />;
+    if (pageActive === "dashboard") return <Dashboard role={role} />;
+    if (pageActive === "members") return <Members role={role} />;
+    if (pageActive === "cotisations") return <Cotisations role={role} />;
+    if (pageActive === "sociales") return <Sociales role={role} />;
+    if (pageActive === "expenses") return <Expenses role={role} />;
+    if (pageActive === "suspensions") return <Suspensions role={role} />;
+    if (pageActive === "reports") return <Reports role={role} />;
+
+    return <Dashboard role={role} />;
   };
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
       <aside className="w-64 bg-slate-900 text-white p-5">
-        <h1 className="text-2xl font-bold mb-8">Gestion Familiale</h1>
+        <h1 className="text-2xl font-bold mb-2">Gestion Familiale</h1>
+
+        <p className="text-sm text-slate-300 mb-6">
+          Rôle : {role || "lecteur"}
+        </p>
 
         <nav className="space-y-2">
           {menu.map((item) => (
@@ -52,20 +58,8 @@ function MainLayout({ profile })  {
           ))}
         </nav>
       </aside>
-<main className="flex-1 p-6">
-  <div className="mb-4 text-sm text-gray-600">
-    Connecté comme :{" "}
-    <span className="font-semibold">
-      {profile?.email}
-    </span>{" "}
-    — Rôle :{" "}
-    <span className="font-semibold">
-      {profile?.role}
-    </span>
-  </div>
 
-  {afficherPage()}
-</main>
+      <main className="flex-1 p-6">{afficherPage()}</main>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { formatDate, formatMoney } from "../utils/formatters";
 
-function Expenses() {
+function Expenses({ role }) {
   const [expenses, setExpenses] = useState([]);
   const [selectedMotif, setSelectedMotif] = useState(null);
 
@@ -121,7 +121,7 @@ function handleEdit(expense) {
       <h2 className="text-3xl font-bold mb-6">Dépenses</h2>
 
       {/* FORMULAIRE */}
-      <div className="bg-white p-6 rounded-xl shadow mb-6">
+     {role === "admin" && ( <div className="bg-white p-6 rounded-xl shadow mb-6">
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
@@ -175,6 +175,7 @@ function handleEdit(expense) {
           </button>
         </form>
       </div>
+)}
 
       {/* BOX MOTIFS */}
       <div className="bg-white rounded-xl shadow p-5 mb-6">
@@ -229,7 +230,9 @@ function handleEdit(expense) {
                   {item.source_depense}
                 </p>
               
-               <div className="flex gap-2 mt-2">
+              {role === "admin" && (
+  <div className="flex gap-2 mt-2">
+
   <button
     onClick={() => handleEdit(item)}
     className="text-xs bg-yellow-500 text-white px-2 py-1 rounded"
@@ -244,6 +247,7 @@ function handleEdit(expense) {
     Supprimer
   </button>
 </div>
+)}
 
 
               </div>

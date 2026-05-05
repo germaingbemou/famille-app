@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { formatDate, formatMoney } from "../utils/formatters";
 
-function Cotisations() {
+function Cotisations({ role }) {
   const [members, setMembers] = useState([]);
   const [cotisations, setCotisations] = useState([]);
   const [sociales, setSociales] = useState([]);
@@ -157,6 +157,8 @@ function Cotisations() {
     <div>
       <h2 className="text-3xl font-bold mb-6">Cotisations</h2>
 
+{role === "admin" && (
+
       <div className="bg-white p-6 rounded-xl shadow mb-6">
         <form
           onSubmit={handleSubmit}
@@ -217,6 +219,7 @@ function Cotisations() {
           </button>
         </form>
       </div>
+)}
 
       <div className="bg-white rounded-xl shadow p-5 mb-6">
         <h3 className="text-xl font-bold mb-4">Résumé par membre</h3>
@@ -299,7 +302,9 @@ function Cotisations() {
                         </p>
                       )}
 
-                      <div className="flex gap-2 mt-2">
+{role === "admin" && (
+  <div className="flex gap-2 mt-2">                    
+
                         <button
                           type="button"
                           onClick={() => handleEdit(cotisation)}
@@ -315,6 +320,7 @@ function Cotisations() {
                         >
                           Supprimer
                         </button>
+)}
                       </div>
                     </div>
                   ))}

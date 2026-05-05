@@ -6,65 +6,68 @@ import MainLayout from "./layouts/MainLayout";
 
 function App() {
   const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function getInitialSession() {
-      const { data } = await supabase.auth.getSession();
+    async function getSessionAndRole() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      setSession(data.session);
+      setSession(session);
 
-      if (data.session?.user) {
-        await fetchProfile(data.session.user.id);
+      if (session?.user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single();
+
+        setRole(data?.role || "lecteur");
       }
 
       setLoading(false);
     }
 
-    getInitialSession();
+    getSessionAndRole();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
+    } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
 
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
+        if (session?.user) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single();
+
+          setRole(data?.role || "lecteur");
+        } else {
+          setRole(null);
+        }
       }
-
-      setLoading(false);
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function fetchProfile(userId) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.log(error);
-      setProfile(null);
-    } else {
-      setProfile(data);
-    }
-  }
-
   if (loading) {
-    return <p className="p-6">Chargement...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Chargement...
+      </div>
+    );
   }
 
   if (!session) {
     return <Login />;
   }
 
-  return <MainLayout profile={profile} />;
+  return <MainLayout role={role} />;
 }
 
 export default App;
