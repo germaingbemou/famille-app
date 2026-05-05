@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { formatDate } from "../utils/formatters";
 
-function Suspensions() {
+function Suspensions({ role }) {
   const [suspensions, setSuspensions] = useState([]);
   const [editingSuspension, setEditingSuspension] = useState(null);
 
@@ -289,3 +289,32 @@ function Suspensions() {
 }
 
 export default Suspensions;
+ return (
+    <div>
+      <h2 className="text-3xl font-bold mb-6">Suspensions</h2>
+
+      {role === "admin" && (
+        <div className="bg-white p-6 rounded-xl shadow mb-6">
+          {/* formulaire */}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {suspensions.map((s) => (
+          <div key={s.id} className="border p-4 rounded">
+
+            {/* contenu */}
+
+            {role === "admin" && (
+              <div className="flex gap-2 mt-2">
+                <button onClick={() => handleEdit(s)}>Modifier</button>
+                <button onClick={() => handleDelete(s.id)}>Supprimer</button>
+              </div>
+            )}
+
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { formatDate, formatMoney } from "../utils/formatters";
 
-function Sociales() {
+function Sociales({ role }) {
+
   const [members, setMembers] = useState([]);
   const [sociales, setSociales] = useState([]);
   const [cotisations, setCotisations] = useState([]);
@@ -271,5 +272,30 @@ function Sociales() {
     </div>
   );
 }
+ return (
+    <div>
+      <h2 className="text-3xl font-bold mb-6">Sociales</h2>
 
+      {role === "admin" && (
+        <div className="bg-white p-6 rounded-xl shadow mb-6">
+          {/* votre formulaire */}
+        </div>
+      )}
+
+      {/* historique */}
+      {socialesDuMembre.map((sociale) => (
+        <div key={sociale.id}>
+          {/* contenu */}
+
+          {role === "admin" && (
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => handleEdit(sociale)}>Modifier</button>
+              <button onClick={() => handleDelete(sociale.id)}>Supprimer</button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 export default Sociales;
