@@ -5,7 +5,6 @@ import { formatDate, formatMoney } from "../utils/formatters";
 function Sociales({ role }) {
   const [members, setMembers] = useState([]);
   const [sociales, setSociales] = useState([]);
-  const [cotisations, setCotisations] = useState([]);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
   const [editingSociale, setEditingSociale] = useState(null);
 
@@ -22,17 +21,14 @@ function Sociales({ role }) {
 
   async function fetchData() {
     const { data: membersData } = await supabase.from("members").select("*");
+
     const { data: socialesData } = await supabase
       .from("sociales")
       .select("*")
       .order("date_sociale", { ascending: false });
-    const { data: cotisationsData } = await supabase
-      .from("cotisations")
-      .select("*");
 
     setMembers(membersData || []);
     setSociales(socialesData || []);
-    setCotisations(cotisationsData || []);
   }
 
   function handleChange(e) {
@@ -72,27 +68,29 @@ function Sociales({ role }) {
     fetchData();
   }
 
-  const socialesDuMembre = sociales.filter(
-    (s) => s.member_id === selectedMemberId
-  );
+  const socialesDuMembre = selectedMemberId
+    ? sociales.filter((s) => s.member_id === selectedMemberId)
+    : [];
 
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6">Sociales</h2>
 
+      {/* FORMULAIRE ADMIN */}
       {role === "admin" && (
         <div className="bg-white p-6 rounded-xl shadow mb-6">
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
           >
             <select
               name="member_id"
               value={formData.member_id}
               onChange={handleChange}
-              className="border p-2"
+              className="border p-3 rounded-lg"
+              required
             >
-              <option value="">Membre</option>
+              <option value="">Sélectionner un membre</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.nom_complet}
@@ -105,7 +103,8 @@ function Sociales({ role }) {
               name="date_sociale"
               value={formData.date_sociale}
               onChange={handleChange}
-              className="border p-2"
+              className="border p-3 rounded-lg"
+              required
             />
 
             <input
@@ -113,7 +112,8 @@ function Sociales({ role }) {
               placeholder="Montant"
               value={formData.montant}
               onChange={handleChange}
-              className="border p-2"
+              className="border p-3 rounded-lg"
+              required
             />
 
             <input
@@ -121,36 +121,81 @@ function Sociales({ role }) {
               placeholder="Commentaire"
               value={formData.commentaire}
               onChange={handleChange}
-              className="border p-2"
+              className="border p-3 rounded-lg"
             />
 
-            <button className="bg-blue-600 text-white p-2">
+            <button className="bg-blue-600 text-white p-3 rounded-lg">
               Enregistrer
             </button>
           </form>
         </div>
       )}
 
-      <div>
-        {members.map((m) => (
-          <button key={m.id} onClick={() => setSelectedMemberId(m.id)}>
-            {m.nom_complet}
-          </button>
-        ))}
+      {/* LISTE MEMBRES EN BOX */}
+      <div className="bg-white rounded-xl shadow p-5 mb-6">
+        <h3 className="text-xl font-bold mb-4">Sélectionner un membre</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {members.map((m) => (
+            <div
+              key={m.id}
+              onClick={() => setSelectedMemberId(m.id)}
+              className={`cursor-pointer border p-4 rounded-xl shadow-sm hover:shadow-md ${
+                selectedMemberId === m.id
+                  ? "border-blue-600 ring-2 ring-blue-200"
+                  : ""
+              }`}
+            >
+              <p className="font-bold">{m.nom_complet}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {socialesDuMembre.map((s) => (
-        <div key={s.id}>
-          {formatMoney(s.montant)} - {formatDate(s.date_sociale)}
+      {/* HISTORIQUE */}
+      {selectedMemberId && (
+        <div className="bg-white rounded-xl shadow p-5">
+          <h3 className="text-xl font-bold mb-4">
+            Historique sociales
+          </h3>
 
-          {role === "admin" && (
-            <div>
-              <button onClick={() => handleEdit(s)}>Modifier</button>
-              <button onClick={() => handleDelete(s.id)}>Supprimer</button>
-            </div>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2">
+            {socialesDuMembre.map((s) => (
+              <div
+                key={s.id}
+                className="border rounded-lg p-2 text-sm bg-slate-50"
+              >
+                <p className="font-bold">{formatMoney(s.montant)}</p>
+                <p className="text-gray-500">
+                  {formatDate(s.date_sociale)}
+                </p>
+
+                {s.commentaire && (
+                  <p className="text-gray-600">{s.commentaire}</p>
+                )}
+
+                {role === "admin" && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => handleEdit(s)}
+                      className="text-xs bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                      Modifier
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
