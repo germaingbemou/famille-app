@@ -303,25 +303,27 @@ function Cotisations({ role }) {
                       )}
 
 {role === "admin" && (
-  <div className="flex gap-2 mt-2">                    
+  <div className="flex gap-2 mt-2">
 
-                        <button
-                          type="button"
-                          onClick={() => handleEdit(cotisation)}
-                          className="text-xs bg-yellow-500 text-white px-2 py-1 rounded"
-                        >
-                          Modifier
-                        </button>
+    <button
+      type="button"
+      onClick={() => handleEdit(cotisation)}
+      className="text-xs bg-yellow-500 text-white px-2 py-1 rounded"
+    >
+      Modifier
+    </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(cotisation.id)}
-                          className="text-xs bg-red-600 text-white px-2 py-1 rounded"
-                        >
-                          Supprimer
-                        </button>
+    <button
+      type="button"
+      onClick={() => handleDelete(cotisation.id)}
+      className="text-xs bg-red-600 text-white px-2 py-1 rounded"
+    >
+      Supprimer
+    </button>
+
+  </div>
 )}
-                      </div>
+
                     </div>
                   ))}
                 </div>

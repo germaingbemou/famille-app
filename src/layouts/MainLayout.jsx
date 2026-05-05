@@ -1,3 +1,4 @@
+import { supabase } from "../services/supabase";
 import { useState } from "react";
 
 import Dashboard from "../pages/Dashboard";
@@ -41,6 +42,15 @@ function MainLayout({ role }) {
         <p className="text-sm text-slate-300 mb-6">
           Rôle : {role || "lecteur"}
         </p>
+<button
+  onClick={async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  }}
+  className="w-full bg-red-600 text-white px-4 py-2 rounded-lg mb-6"
+>
+  Déconnexion
+</button>
 
         <nav className="space-y-2">
           {menu.map((item) => (
