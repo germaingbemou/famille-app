@@ -6,53 +6,72 @@ import MainLayout from "./layouts/MainLayout";
 
 function App() {
   const [session, setSession] = useState(null);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("lecteur");
   const [loading, setLoading] = useState(true);
 
+  async function fetchRole(userId) {
+    if (!userId) {
+      setRole("lecteur");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.log("Erreur rôle:", error);
+      setRole("lecteur");
+    } else {
+      setRole(data?.role || "lecteur");
+    }
+  }
+
   useEffect(() => {
-    async function getSessionAndRole() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    let mounted = true;
 
-      setSession(session);
+    async function initAuth() {
+      const { data, error } = await supabase.auth.getSession();
 
-      if (session?.user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
+      if (!mounted) return;
 
-        setRole(data?.role || "lecteur");
+      if (error) {
+        console.log("Erreur session:", error);
+      }
+
+      setSession(data.session);
+
+      if (data.session?.user) {
+        await fetchRole(data.session.user.id);
       }
 
       setLoading(false);
     }
 
-    getSessionAndRole();
+    initAuth();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (!mounted) return;
 
-        if (session?.user) {
-          const { data } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", session.user.id)
-            .single();
+      setSession(newSession);
 
-          setRole(data?.role || "lecteur");
-        } else {
-          setRole(null);
-        }
+      if (newSession?.user) {
+        await fetchRole(newSession.user.id);
+      } else {
+        setRole("lecteur");
       }
-    );
 
-    return () => subscription.unsubscribe();
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (loading) {
